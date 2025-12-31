@@ -1,0 +1,5 @@
+download-aria-skill/
+__pycache__/
+*.pyc
+.history/
+.DS_Store
