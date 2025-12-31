@@ -1,8 +1,8 @@
-# aria2-download (Codex Skill)
+# aria2-download (Anthropic Skills Compatible)
 
 [中文说明](./README.zh-cn.md)
 
-High-performance parallel downloader Skill for Codex CLI. It uses `aria2c` (multi-connection + resume + proxy) to replace `curl`/`wget` when your network is slow or you need to speed up large file downloads.
+High-performance parallel downloader Skill for Anthropic skills compatible tools. It uses `aria2c` (multi-connection + resume + proxy) to replace `curl`/`wget` when your network is slow or you need to speed up large file downloads.
 
 ## What this Skill does
 
@@ -14,7 +14,7 @@ High-performance parallel downloader Skill for Codex CLI. It uses `aria2c` (mult
 
 ## Prerequisites
 
-- Codex CLI installed (for Skill usage)
+- Anthropic skills compatible tool installed (for Skill usage)
 - Python 3.8+ (to run `scripts/download.py`)
 - `aria2c`:
   - Bundled under `assets/bin/**` (preferred)
@@ -22,48 +22,48 @@ High-performance parallel downloader Skill for Codex CLI. It uses `aria2c` (mult
 
 ## Install
 
-### 1) Install Codex CLI (npm)
+### 1) Install Anthropic skills compatible tool
 
 Prerequisite: Node.js + npm (recommended: Node.js 18+).
 
 ```bash
-npm i -g @openai/codex@latest
-codex --version
+npm i -g @anthropic-ai/cli@latest
+anthropic --version
 ```
 
 First run:
 
 ```bash
-codex
+anthropic
 ```
 
 ### 2) Install this Skill
 
 Pick one directory (any is fine) and place this repo folder under it:
 
-- Current project: `$CWD/.codex/skills/aria2-download/`
-- Repo root: `$REPO_ROOT/.codex/skills/aria2-download/`
-- User global: `$CODEX_HOME/skills/aria2-download/` (default `~/.codex/skills`)
+- Current project: `$CWD/.anthropic/skills/aria2-download/`
+- Repo root: `$REPO_ROOT/.anthropic/skills/aria2-download/`
+- User global: `$ANTHROPIC_HOME/skills/aria2-download/` (default `~/.anthropic/skills`)
 
-After installing, restart `codex`, then type `/skills` to verify it is discovered.
+After installing, restart your Anthropic skills compatible tool, then type `/skills` to verify it is discovered.
 
 ### 3) (Optional) Install via `skill-installer`
 
-If you already have the `skill-installer` system skill available in Codex, you can also ask it to install this repository as a skill (from a GitHub repo/path). After installation, restart `codex`.
+If you already have the `skill-installer` system skill available in your Anthropic skills compatible tool, you can also ask it to install this repository as a skill (from a GitHub repo/path). After installation, restart your tool.
 
-## Use in Codex
+## Use in Anthropic skills compatible tools
 
-In Codex chat:
+In your Anthropic skills compatible tool's chat interface:
 
 - List skills: `/skills`
 - Explicitly call: mention the skill name `aria2-download` (or type `$` to select it)
 
 Example prompts:
 
-- “Use `aria2-download` to download https://example.com/bigfile.zip”
-- “Use `aria2-download` to download URL to `my-downloads/` with proxy `http://127.0.0.1:7890`”
+- "Use `aria2-download` to download https://example.com/bigfile.zip"
+- "Use `aria2-download` to download URL to `my-downloads/` with proxy `http://127.0.0.1:7890`"
 
-## Use the script directly (without Codex)
+## Use the script directly (without Anthropic skills compatible tools)
 
 Basic:
 
@@ -111,19 +111,19 @@ aria2c -x 16 -s 16 -c https://example.com/bigfile.zip
 
 ## Manual install / create your own Skill
 
-1. Choose a location: `$CWD/.codex/skills`, `$REPO_ROOT/.codex/skills`, or `$CODEX_HOME/skills`
-2. Create a folder like `.../.codex/skills/my-skill/`
-3. Add `.../.codex/skills/my-skill/SKILL.md` with at least a YAML header containing `name` and `description`
-4. Restart `codex`, then use `/skills` to confirm it is loaded
+1. Choose a location: `$CWD/.anthropic/skills`, `$REPO_ROOT/.anthropic/skills`, or `$ANTHROPIC_HOME/skills`
+2. Create a folder like `.../.anthropic/skills/my-skill/`
+3. Add `.../.anthropic/skills/my-skill/SKILL.md` with at least a YAML header containing `name` and `description`
+4. Restart your Anthropic skills compatible tool, then use `/skills` to confirm it is loaded
 
 ## Triggering Skills (2 ways)
 
 - Explicit: mention the skill name (or type `$` to select)
-- Implicit: Codex may auto-enable a skill when your request matches the skill `description`
+- Implicit: Your Anthropic skills compatible tool may auto-enable a skill when your request matches the skill `description`
 
 ## Project layout
 
-- `SKILL.md`: Skill metadata + usage details for Codex
+- `SKILL.md`: Skill metadata + usage details
 - `scripts/download.py`: main entry to run `aria2c`
 - `assets/bin/**`: bundled `aria2c` binaries for Windows/Linux/macOS
 
