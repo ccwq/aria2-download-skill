@@ -6,16 +6,33 @@ import argparse
 import re
 from typing import List, Optional
 
+import shutil
+
 # aria2c output pattern: [#2089b0 400.0KiB/30MiB(1%) CN:1 DL:115KiB ETA:4m23s]
 PROGRESS_PATTERN = re.compile(
-    r"\[#[0-9a-fA-F]+\s+([0-9.]+[KMGTP]?i?B)/([0-9.]+[KMGTP]?i?B)\((\d+)%\).*?DL:([0-9.]+[KMGTP]?i?B).*?ETA:([0-9a-z]+)\]"
+    r"\[#[0-9a-fA-F]+\s+([0-9.]+[KMGTP]?i?B)/([0-9.]+[KMGTP]?i?B)\((\d+)%\).*?DL:([0-9.]+[KMGTP]?i?B)(?:.*?ETA:([0-9a-z]+))?\]"
 )
 
-def print_progress(percent: str, downloaded: str, total: str, speed: str, eta: str):
+def print_progress(percent: str, downloaded: str, total: str, speed: str, eta: str = "未知"):
     """Prints a numeric progress line to stdout."""
-    # Carriage return \r allows overwriting the line
-    msg = f"\r下载进度: {percent}% | 已下载: {downloaded}/{total} | 速度: {speed} | 剩余时间: {eta}"
-    sys.stdout.write(msg)
+    # Shorten labels to save space
+    msg = f"进度:{percent}% 已下:{downloaded}/{total} 速:{speed} 剩:{eta}"
+
+    # Get terminal width to prevent wrapping
+    try:
+        columns = shutil.get_terminal_size((80, 20)).columns
+    except:
+        columns = 80
+
+    # Pad with spaces to clear previous line content
+    # Truncate if too long to prevent wrapping
+    if len(msg) > columns - 1:
+        msg = msg[:columns-1]
+
+    padding = " " * (columns - len(msg) - 1)
+
+    # Use \r to return to start of line
+    sys.stdout.write(f"\r{msg}{padding}")
     sys.stdout.flush()
 
 def get_aria2_path():
@@ -176,15 +193,16 @@ def download(
             match = PROGRESS_PATTERN.search(line)
             if match:
                 downloaded, total, percent, speed, eta = match.groups()
+                if not eta:
+                    eta = "未知"
                 print_progress(percent, downloaded, total, speed, eta)
             else:
-                # If not a progress line, just print it (clearing the progress line first if needed)
-                # But to keep it simple and avoid messing up the display, we just print non-progress lines
-                # usually at start or errors.
-                # If we are in the middle of progress, a simple print might append.
-                # Let's clear line first just in case.
-                sys.stdout.write(f"\r\033[K{line}\n")
-                sys.stdout.flush()
+                # If not a progress line, only print if it's likely an error or important info
+                # Clear line first
+                if "ERROR" in line or "Exception" in line or "fail" in line.lower():
+                     sys.stdout.write(f"\r\033[K{line}\n")
+                     sys.stdout.flush()
+                # Otherwise ignore to keep display clean during download
 
         process.wait()
 
