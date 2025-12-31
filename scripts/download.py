@@ -3,7 +3,20 @@ import sys
 import subprocess
 import platform
 import argparse
+import re
 from typing import List, Optional
+
+# aria2c output pattern: [#2089b0 400.0KiB/30MiB(1%) CN:1 DL:115KiB ETA:4m23s]
+PROGRESS_PATTERN = re.compile(
+    r"\[#[0-9a-fA-F]+\s+([0-9.]+[KMGTP]?i?B)/([0-9.]+[KMGTP]?i?B)\((\d+)%\).*?DL:([0-9.]+[KMGTP]?i?B).*?ETA:([0-9a-z]+)\]"
+)
+
+def print_progress(percent: str, downloaded: str, total: str, speed: str, eta: str):
+    """Prints a numeric progress line to stdout."""
+    # Carriage return \r allows overwriting the line
+    msg = f"\r下载进度: {percent}% | 已下载: {downloaded}/{total} | 速度: {speed} | 剩余时间: {eta}"
+    sys.stdout.write(msg)
+    sys.stdout.flush()
 
 def get_aria2_path():
     base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -144,14 +157,46 @@ def download(
     print(f"正在启动下载: {url}")
     print(f"输出目录: {os.path.abspath(output_dir)}")
     try:
-        subprocess.run(cmd, check=True)
-        print("下载完成！")
+        # Use Popen to capture output in real-time
+        process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            encoding='utf-8',
+            errors='replace',
+            universal_newlines=True,
+            bufsize=1
+        )
+
+        for line in process.stdout:
+            line = line.strip()
+            if not line:
+                continue
+
+            match = PROGRESS_PATTERN.search(line)
+            if match:
+                downloaded, total, percent, speed, eta = match.groups()
+                print_progress(percent, downloaded, total, speed, eta)
+            else:
+                # If not a progress line, just print it (clearing the progress line first if needed)
+                # But to keep it simple and avoid messing up the display, we just print non-progress lines
+                # usually at start or errors.
+                # If we are in the middle of progress, a simple print might append.
+                # Let's clear line first just in case.
+                sys.stdout.write(f"\r\033[K{line}\n")
+                sys.stdout.flush()
+
+        process.wait()
+
+        if process.returncode == 0:
+            print("\n下载完成！")
+        else:
+            print(f"\n下载失败：aria2c 返回非 0 退出码（{process.returncode}）。")
+            sys.exit(process.returncode)
+
     except FileNotFoundError:
         print("下载失败：未找到 aria2c 可执行文件（也未在系统 PATH 中找到）。")
         sys.exit(1)
-    except subprocess.CalledProcessError as e:
-        print(f"下载失败：aria2c 返回非 0 退出码（{e.returncode}）。")
-        sys.exit(e.returncode if isinstance(e.returncode, int) else 1)
     except Exception as e:
         print(f"下载失败：{e}")
         sys.exit(1)
