@@ -53,7 +53,7 @@ description: 高性能并行下载工具。在网络环境较差或需要加速�
 - `--file-allocation {none,prealloc,trunc,falloc}`：文件预分配方式（默认：`none`）
 
 请求相关：
-- `--user-agent UA`：自定义 User-Agent
+- `--user-agent UA`：自定义 User-Agent（默认使用 Chrome UA）
 - `--referer URL`：自定义 Referer
 - `-H, --header "K: V"`：自定义请求头（可重复）
   - 示例：`-H "Authorization: Bearer xxx" -H "Cookie: a=b"`
