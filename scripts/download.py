@@ -8,6 +8,8 @@ from typing import List, Optional
 
 import shutil
 
+DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+
 # aria2c output pattern: [#2089b0 400.0KiB/30MiB(1%) CN:1 DL:115KiB ETA:4m23s]
 PROGRESS_PATTERN = re.compile(
     r"\[#[0-9a-fA-F]+\s+([0-9.]+[KMGTP]?i?B)/([0-9.]+[KMGTP]?i?B)\((\d+)%\).*?DL:([0-9.]+[KMGTP]?i?B)(?:.*?ETA:([0-9a-z]+))?\]"
@@ -117,6 +119,8 @@ def build_aria2_command(
 
     if user_agent:
         cmd.append(f"--user-agent={user_agent}")
+    else:
+        cmd.append(f"--user-agent={DEFAULT_USER_AGENT}")
 
     if referer:
         cmd.append(f"--referer={referer}")
